@@ -5,17 +5,21 @@ typedef std::unordered_map<std::string, std::string> Tags;
 
 struct TrackInfo {
   std::uint64_t timestamp;
-  std::uint64_t track_id;
+  std::int64_t track_id;
   Tags tags;
+  
+  TrackInfo(Tags &&in_tags) : timestamp(0), track_id(-1), tags(in_tags) {}
 };
 typedef std::vector<TrackInfo> TrackInfo_v;
 
 struct TrackView {
   std::uint64_t timestamp;
-  std::uint64_t track_id;
-  std::uint64_t view_id;
+  std::int64_t track_id;
   std::string filename;
   std::string preset;
+  
+  TrackView(const std::string &in_filename, const std::string &in_preset)
+  : timestamp(0), track_id(-1), filename(in_filename), preset(in_preset) {}
 };
 typedef std::vector<TrackView> TrackView_v;
 

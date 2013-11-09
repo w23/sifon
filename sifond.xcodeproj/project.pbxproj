@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E1116739182E8275007014BC /* DB_ram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1116737182E8275007014BC /* DB_ram.cpp */; };
 		E1B4BF98182D51EC00927851 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1B4BF97182D51EC00927851 /* main.cpp */; };
 		E1B4BF9B182D524500927851 /* Server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1B4BF99182D524500927851 /* Server.cpp */; };
 		E1B4BF9F182E026300927851 /* Gather.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1B4BF9D182E026300927851 /* Gather.cpp */; };
 		E1C33729182E284F00F56270 /* Meta_ffmpeg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1C33727182E284F00F56270 /* Meta_ffmpeg.cpp */; };
+		E1C3372F182E43F900F56270 /* DB_soci.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1C3372D182E43F900F56270 /* DB_soci.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +31,8 @@
 		E10A5776182E119400185CD0 /* IDatabase.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IDatabase.h; sourceTree = "<group>"; };
 		E10A5777182E126400185CD0 /* TrackInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TrackInfo.h; sourceTree = "<group>"; };
 		E10A5778182E17A700185CD0 /* stable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stable.h; sourceTree = "<group>"; };
+		E1116737182E8275007014BC /* DB_ram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DB_ram.cpp; sourceTree = "<group>"; };
+		E1116738182E8275007014BC /* DB_ram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DB_ram.h; sourceTree = "<group>"; };
 		E180E3E3182D4E6D003B638C /* sifond */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sifond; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1B4BF97182D51EC00927851 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E1B4BF99182D524500927851 /* Server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Server.cpp; sourceTree = "<group>"; };
@@ -38,6 +42,8 @@
 		E1B4BF9E182E026300927851 /* Gather.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Gather.h; sourceTree = "<group>"; };
 		E1C33727182E284F00F56270 /* Meta_ffmpeg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Meta_ffmpeg.cpp; sourceTree = "<group>"; };
 		E1C33728182E284F00F56270 /* Meta_ffmpeg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Meta_ffmpeg.h; sourceTree = "<group>"; };
+		E1C3372D182E43F900F56270 /* DB_soci.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DB_soci.cpp; sourceTree = "<group>"; };
+		E1C3372E182E43F900F56270 /* DB_soci.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DB_soci.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +87,10 @@
 				E10A5778182E17A700185CD0 /* stable.h */,
 				E1C33727182E284F00F56270 /* Meta_ffmpeg.cpp */,
 				E1C33728182E284F00F56270 /* Meta_ffmpeg.h */,
+				E1C3372D182E43F900F56270 /* DB_soci.cpp */,
+				E1C3372E182E43F900F56270 /* DB_soci.h */,
+				E1116737182E8275007014BC /* DB_ram.cpp */,
+				E1116738182E8275007014BC /* DB_ram.h */,
 			);
 			path = sifond;
 			sourceTree = "<group>";
@@ -138,7 +148,9 @@
 			files = (
 				E1B4BF9B182D524500927851 /* Server.cpp in Sources */,
 				E1B4BF9F182E026300927851 /* Gather.cpp in Sources */,
+				E1C3372F182E43F900F56270 /* DB_soci.cpp in Sources */,
 				E1B4BF98182D51EC00927851 /* main.cpp in Sources */,
+				E1116739182E8275007014BC /* DB_ram.cpp in Sources */,
 				E1C33729182E284F00F56270 /* Meta_ffmpeg.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -221,13 +233,16 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					/usr/local/include,
+					/usr/local/include/soci,
 				);
 				OTHER_LDFLAGS = (
 					"-levent",
-					"-lboost_system",
-					"-lboost_filesystem",
+					"-lboost_system-mt",
+					"-lboost_filesystem-mt",
 					"-lavformat",
 					"-lavutil",
+					"-lsoci_core",
+					"-lsoci_postgresql",
 					"-L/usr/local/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -241,13 +256,16 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					/usr/local/include,
+					/usr/local/include/soci,
 				);
 				OTHER_LDFLAGS = (
 					"-levent",
-					"-lboost_system",
-					"-lboost_filesystem",
+					"-lboost_system-mt",
+					"-lboost_filesystem-mt",
 					"-lavformat",
 					"-lavutil",
+					"-lsoci_core",
+					"-lsoci_postgresql",
 					"-L/usr/local/lib",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";

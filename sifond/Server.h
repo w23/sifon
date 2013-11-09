@@ -1,17 +1,24 @@
 #pragma once
-#include <string>
-#include <event2/event.h>
-#include <event2/http.h>
+#include "stable.h"
 
+class IDatabase;
 class Server {
 public:
-  Server(const std::string &hostname, int port);
+  Server(const IDatabase &db, const std::string &hostname, int port);
   ~Server();
   
   int serve();
   
 private:
   static void any_request_cb(struct evhttp_request *req, void *arg);
+  //static void s_cb_req_play(struct evhttp_request *req, void *arg);
+  
+  inline static void s_cb_req_get(struct evhttp_request *req, void *arg) {
+    reinterpret_cast<Server*>(arg)->req_get(req);
+  }
+  void req_get(struct evhttp_request *req);
+  
+  const IDatabase &db_;
   
   class EvBase {
     struct event_base *base_;
