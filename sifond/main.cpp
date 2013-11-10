@@ -5,6 +5,11 @@
 #include "Server.h"
 
 int main(int argc, char *argv[]) {
+  if (argc < 4) {
+    std::cerr << "Usage: music_path host port" << std::endl;
+    return EINVAL;
+  }
+  
   av_register_all();
   
   Meta_ffmpeg meta;
@@ -14,6 +19,6 @@ int main(int argc, char *argv[]) {
   Gather gather(db, meta, argv[1]);
   Scatter scatter(db);
   
-  Server server(db, scatter, "localhost", 8080);
+  Server server(db, scatter, argv[2], std::stoi(argv[3]));
   return server.serve();
 }
