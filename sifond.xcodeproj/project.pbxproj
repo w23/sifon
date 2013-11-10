@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E1116739182E8275007014BC /* DB_ram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1116737182E8275007014BC /* DB_ram.cpp */; };
+		E111673C182F3B46007014BC /* Scatter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E111673A182F3B46007014BC /* Scatter.cpp */; };
 		E1B4BF98182D51EC00927851 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1B4BF97182D51EC00927851 /* main.cpp */; };
 		E1B4BF9B182D524500927851 /* Server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1B4BF99182D524500927851 /* Server.cpp */; };
 		E1B4BF9F182E026300927851 /* Gather.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E1B4BF9D182E026300927851 /* Gather.cpp */; };
@@ -33,6 +34,8 @@
 		E10A5778182E17A700185CD0 /* stable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stable.h; sourceTree = "<group>"; };
 		E1116737182E8275007014BC /* DB_ram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DB_ram.cpp; sourceTree = "<group>"; };
 		E1116738182E8275007014BC /* DB_ram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DB_ram.h; sourceTree = "<group>"; };
+		E111673A182F3B46007014BC /* Scatter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Scatter.cpp; sourceTree = "<group>"; };
+		E111673B182F3B46007014BC /* Scatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Scatter.h; sourceTree = "<group>"; };
 		E180E3E3182D4E6D003B638C /* sifond */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = sifond; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1B4BF97182D51EC00927851 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E1B4BF99182D524500927851 /* Server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Server.cpp; sourceTree = "<group>"; };
@@ -91,6 +94,8 @@
 				E1C3372E182E43F900F56270 /* DB_soci.h */,
 				E1116737182E8275007014BC /* DB_ram.cpp */,
 				E1116738182E8275007014BC /* DB_ram.h */,
+				E111673A182F3B46007014BC /* Scatter.cpp */,
+				E111673B182F3B46007014BC /* Scatter.h */,
 			);
 			path = sifond;
 			sourceTree = "<group>";
@@ -149,6 +154,7 @@
 				E1B4BF9B182D524500927851 /* Server.cpp in Sources */,
 				E1B4BF9F182E026300927851 /* Gather.cpp in Sources */,
 				E1C3372F182E43F900F56270 /* DB_soci.cpp in Sources */,
+				E111673C182F3B46007014BC /* Scatter.cpp in Sources */,
 				E1B4BF98182D51EC00927851 /* main.cpp in Sources */,
 				E1116739182E8275007014BC /* DB_ram.cpp in Sources */,
 				E1C33729182E284F00F56270 /* Meta_ffmpeg.cpp in Sources */,

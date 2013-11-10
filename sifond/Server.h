@@ -2,23 +2,30 @@
 #include "stable.h"
 
 class IDatabase;
+class Scatter;
 class Server {
 public:
-  Server(const IDatabase &db, const std::string &hostname, int port);
+  Server(const IDatabase &db, const Scatter &scatter, const std::string &hostname, int port);
   ~Server();
   
   int serve();
   
 private:
-  static void any_request_cb(struct evhttp_request *req, void *arg);
-  //static void s_cb_req_play(struct evhttp_request *req, void *arg);
-  
-  inline static void s_cb_req_get(struct evhttp_request *req, void *arg) {
-    reinterpret_cast<Server*>(arg)->req_get(req);
+  inline static void s_cb_req(struct evhttp_request *req, void *arg) {
+    reinterpret_cast<Server*>(arg)->req(req);
   }
-  void req_get(struct evhttp_request *req);
+  void req(struct evhttp_request *req);
+  
+  inline static void s_cb_req_look(struct evhttp_request *req, void *arg) {
+    reinterpret_cast<Server*>(arg)->req_look(req);
+  }
+  void req_look(struct evhttp_request *req);
+  
+  void req_listen(struct evhttp_request *req, std::int64_t track_id, const std::string &view);
+  
   
   const IDatabase &db_;
+  const Scatter &scatter_;
   
   class EvBase {
     struct event_base *base_;

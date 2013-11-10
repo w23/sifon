@@ -1,6 +1,7 @@
 #include "Meta_ffmpeg.h"
 #include "DB_ram.h"
 #include "Gather.h"
+#include "Scatter.h"
 #include "Server.h"
 
 int main(int argc, char *argv[]) {
@@ -11,7 +12,8 @@ int main(int argc, char *argv[]) {
   DB_ram db;
   
   Gather gather(db, meta, argv[1]);
+  Scatter scatter(db);
   
-  Server server(db, "localhost", 8080);
+  Server server(db, scatter, "localhost", 8080);
   return server.serve();
 }

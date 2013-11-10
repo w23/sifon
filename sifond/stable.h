@@ -6,8 +6,10 @@
 #include <thread>
 #include <mutex>
 #include <stdexcept>
+#include <fstream>
 
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <event2/event.h>
 #include <event2/http.h>

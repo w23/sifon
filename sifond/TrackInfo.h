@@ -8,6 +8,7 @@ struct TrackInfo {
   std::int64_t track_id;
   Tags tags;
   
+  TrackInfo(std::int64_t track) : timestamp(0), track_id(track) {}
   TrackInfo(Tags &&in_tags) : timestamp(0), track_id(-1), tags(in_tags) {}
 };
 typedef std::vector<TrackInfo> TrackInfo_v;
