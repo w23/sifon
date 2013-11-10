@@ -28,7 +28,8 @@ int Server::serve() {
 }
 
 void Server::req(struct evhttp_request *req) {
-  std::cerr << "any request" << std::endl;
+  std::cerr << "any request: "
+    << evhttp_request_get_uri(req) << std::endl;
   Uri uri(evhttp_request_get_uri(req));
 
   std::string rawpath(evhttp_uri_get_path(uri.uri));
@@ -48,6 +49,24 @@ void Server::req(struct evhttp_request *req) {
   }
   
   evhttp_send_reply(req, 404, "WHAT", NULL);
+}
+
+std::string json_escape(const std::string &str) {
+  std::stringstream ss;
+  for(auto c: str) {
+    switch(c) {
+      case '\\': ss << "\\\\"; break;
+      case '"': ss << "\\\""; break;
+      case '/': ss << "\\/"; break;
+      case '\b': ss << "\\b"; break;
+      case '\f': ss << "\\f"; break;
+      case '\n': ss << "\\n"; break;
+      case '\r': ss << "\\r"; break;
+      case '\t': ss << "\\t"; break;
+      default: ss << c; break;
+    }
+  }
+  return std::move(ss.str());
 }
 
 void Server::req_look(struct evhttp_request *req) {
@@ -71,19 +90,19 @@ void Server::req_look(struct evhttp_request *req) {
     if (!first) ss << ","; else first = false;
     ss << "{";
     ss << "\"id\":" << t.track_id;
-    ss << ",[";
+    ss << ",\"tags\":{";
     bool firstag = true;
     for (auto tag: t.tags) {
       if (!firstag) ss << ","; else firstag = false;
-      
-//////////////////////////////
-      //! \todo escape!!!!111
-      ss << "{\"" << tag.first << "\":\"" << tag.second << "\"}";
-//////////////////////////////
+      ss << "\"" << json_escape(tag.first)
+        << "\":\"" << json_escape(tag.second) << "\"";
     }
-    ss << "]}";
+    ss << "}}";
   }
   ss << "]";
+  
+  evhttp_add_header(evhttp_request_get_output_headers(req),
+                    "Content-Type", "application/json");
 
   evbuffer *evb = evbuffer_new();
   std::string str(ss.str());
@@ -95,6 +114,7 @@ void Server::req_look(struct evhttp_request *req) {
 
 void Server::req_listen(struct evhttp_request *req,
                         std::int64_t track_id, const std::string &view) {
+  std::cerr << "listen track " << track_id << ":" << view << std::endl;
   IStream *stream = scatter_.get_track_view(track_id, view);
   
   if (!stream) {
@@ -109,6 +129,8 @@ void Server::req_listen(struct evhttp_request *req,
   for (;;) {
     IStream::packet_t pkt(stream->get_next_packet());
     if (!pkt.size) break;
+    std::cerr << track_id << ":" << view
+      << " chunk " << pkt.size << std::endl;
     evbuffer_add(chunkbuffer, pkt.data, pkt.size);
     evhttp_send_reply_chunk(req, chunkbuffer);
   }
