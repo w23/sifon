@@ -11,5 +11,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <libavformat/avformat.h>
+
 #endif /*ifndef __EXTERN_H__*/
 

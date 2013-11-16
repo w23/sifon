@@ -9,7 +9,7 @@ void fscan_posix(const char *path, metadata_read_f metaread, append_track_f appe
 
   cx_list_t *queue = cx_list_make();
   cx_list_insert(queue, cx_string_make(path), NULL);
-  
+
   /* while there are directories left to scan */
   while(queue->front != NULL) {
     cx_list_item_t *nextdir = queue->front;

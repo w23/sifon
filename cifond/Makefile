@@ -1,5 +1,5 @@
-CFLAGS += -g -O0
-LDFLAGS += 
+CFLAGS += -g -O0 `pkg-config --cflags libavformat libavutil`
+LDFLAGS += -lavformat `pkg-config --libs libavformat libavutil`
 
 MODULES = \
 	cx_array.o \
@@ -8,7 +8,8 @@ MODULES = \
 	cx_string.o \
 	fscan_posix.o \
 	main.o \
-	track_info.o
+	track_info.o \
+	meta_ffmpeg.o
 
 cifond: Makefile $(MODULES)
-	$(LINK.c) $(MODULES) -o cifond
+	$(CC) $(MODULES) $(LDFLAGS) -o cifond

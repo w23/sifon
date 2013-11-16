@@ -1,5 +1,6 @@
 #include "extern.h"
 #include "fscan_posix.h"
+#include "meta_ffmpeg.h"
 
 static tags_t *dummy_metadata_reader(void *param, const char *filename) {
   tags_t *tags = tags_make();
@@ -24,6 +25,8 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  av_register_all();
+
   metadata_read_f metaread;
   metaread.param = NULL;
   metaread.func = dummy_metadata_reader;
@@ -32,6 +35,7 @@ int main(int argc, char *argv[]) {
   append.param = NULL;
   append.func = dummy_append_track;
 
-  fscan_posix(argv[1], metaread, append);
+  fscan_posix(argv[1], meta_ffmpeg, append);
+  //fscan_posix(argv[1], metaread, append);
   return 0;
 }
