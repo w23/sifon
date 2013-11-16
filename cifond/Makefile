@@ -1,4 +1,4 @@
-CFLAGS += -g -O0 `pkg-config --cflags libavformat libavutil`
+CFLAGS += -g -O0 `pkg-config --cflags libavformat libavutil` -Wall -Werror
 LDFLAGS += -lavformat `pkg-config --libs libavformat libavutil`
 
 MODULES = \
