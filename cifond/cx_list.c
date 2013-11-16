@@ -3,8 +3,8 @@
 const char *cx_list_class_name = "cx_list";
 
 static void cx_list_dtor(void *list) {
-  cx_list_t *this = (cx_list_t*)list;
-  cx_list_item_t *item = this->front;
+  cx_list_ptr this = (cx_list_ptr)list;
+  cx_list_item_ptr item = this->front;
   while (item != NULL) {
     cx_release(item->obj);
     item = item->next;
@@ -12,19 +12,17 @@ static void cx_list_dtor(void *list) {
   }
 }
 
-cx_list_t *cx_list_make() {
-  cx_list_t *list = (cx_list_t*)malloc(sizeof(cx_list_t));
-  list->O.class_name = cx_list_class_name;
-  list->O.refcount = 1;
-  list->O.dtor = cx_list_dtor;
-  list->front = list->back = NULL;
+cx_list_ptr cx_list_create() {
+  cx_list_ptr this = CX_CREATE(cx_list);
+  this->front = this->back = NULL;
+  return this;
 }
 
-cx_list_item_t *cx_list_insert(cx_list_t *list, void *obj,
-  cx_list_item_t *next) {
-  cx_list_item_t *prev = (next == NULL) ? list->back : next->prev;
+cx_list_item_ptr cx_list_insert(cx_list_ptr list, void *obj,
+  cx_list_item_ptr next) {
+  cx_list_item_ptr prev = (next == NULL) ? list->back : next->prev;
 
-  cx_list_item_t *item = (cx_list_item_t*)malloc(sizeof(cx_list_item_t));
+  cx_list_item_ptr item = (cx_list_item_ptr)malloc(sizeof(struct cx_list_item_t));
   item->list = list;
   item->obj = cx_retain(obj);
   item->next = next;
@@ -35,7 +33,7 @@ cx_list_item_t *cx_list_insert(cx_list_t *list, void *obj,
   return item;
 }
 
-void cx_list_remove(cx_list_item_t *item) {
+void cx_list_remove(cx_list_item_ptr item) {
   if (item->next == NULL) item->list->back = item->prev;
   else item->next->prev = item->prev;
 

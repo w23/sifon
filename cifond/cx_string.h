@@ -4,15 +4,13 @@
 
 extern const char *cx_string_class_name;
 
-typedef struct {
-  CX_O;
+struct cx_string_t { CX_O;
   cx_size_t length;
   char *string;
-} cx_string_t;
+};
+typedef struct cx_string_t *cx_string_ptr;
 
-cx_string_t *cx_string_alloc();
-cx_string_t *cx_string_init(cx_string_t *string, const char *str);
-cx_string_t *cx_string_make(const char *str);
-cx_string_t *cx_string_append(cx_string_t *string, const char *append);
+cx_string_ptr cx_string_create(const char *str);
+cx_string_ptr cx_string_append(cx_string_ptr string, const char *suffix);
 
 #endif /*ifndef __CX_STRING_H__*/

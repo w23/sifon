@@ -5,32 +5,21 @@
 const char *cx_string_class_name = "cx_string";
 
 static void cx_string_dtor(void *s) {
-  free(((cx_string_t*)s)->string);
+  free(((cx_string_ptr)s)->string);
 }
 
-cx_string_t *cx_string_alloc() {
-  return (cx_string_t*)malloc(sizeof(cx_string_t));
+cx_string_ptr cx_string_create(const char *source) {
+  cx_string_ptr this = CX_CREATE(cx_string);
+  this->length = strlen(source);
+  this->string = malloc(this->length + 1);
+  memcpy(this->string, source, this->length + 1);
+  return this;
 }
 
-cx_string_t *cx_string_init(cx_string_t *s, const char *source) {
-  s->O.class_name = cx_string_class_name;
-  s->O.refcount = 1;
-  s->O.dtor = cx_string_dtor;
-
-  s->length = strlen(source);
-  s->string = malloc(s->length + 1);
-  memcpy(s->string, source, s->length + 1);
-  return s;
-}
-
-cx_string_t *cx_string_make(const char *str) {
-  return cx_string_init(cx_string_alloc(), str);
-}
-
-cx_string_t *cx_string_append(cx_string_t *string, const char *append) {
-  cx_size_t len = strlen(append);
-  string->string = realloc(string->string, string->length + len + 1);
-  memcpy(string->string + string->length, append, len + 1);
-  string->length += len;
-  return string;
+cx_string_ptr cx_string_append(cx_string_ptr this, const char *suffix) {
+  cx_size_t suffix_length = strlen(suffix);
+  this->string = realloc(this->string, this->length + suffix_length + 1);
+  memcpy(this->string + this->length, suffix, suffix_length + 1);
+  this->length += suffix_length;
+  return this;
 }

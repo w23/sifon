@@ -9,7 +9,8 @@ MODULES = \
 	fscan_posix.o \
 	main.o \
 	track_info.o \
-	meta_ffmpeg.o
+	meta_ffmpeg.o \
+	tags.o
 
 cifond: Makefile $(MODULES)
 	$(CC) $(MODULES) $(LDFLAGS) -o cifond

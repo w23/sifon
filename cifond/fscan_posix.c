@@ -2,18 +2,21 @@
 #include "cx_list.h"
 #include "fscan_posix.h"
 
-void fscan_posix(const char *path, metadata_read_f metaread, append_track_f append) {
+void fscan_posix(const char *path, struct metadata_read_f metaread,
+  struct append_track_f append) {
   DIR *dir;
   struct dirent entry;
   struct dirent *pentry;
 
-  cx_list_t *queue = cx_list_make();
-  cx_list_insert(queue, cx_string_make(path), NULL);
+  cx_list_ptr queue = cx_list_create();
+  cx_string_ptr pathstr = cx_string_create(path);
+  cx_list_insert(queue, pathstr, NULL);
+  cx_release(pathstr);
 
   /* while there are directories left to scan */
   while(queue->front != NULL) {
-    cx_list_item_t *nextdir = queue->front;
-    cx_string_t *dirname = CX_LIST_ITEM(nextdir, cx_string_t);
+    cx_list_item_ptr nextdir = queue->front;
+    cx_string_ptr dirname = CX_LIST_ITEM(nextdir, cx_string);
     dir = opendir(dirname->string);
     if (dir == NULL) {
       perror(dirname->string);
@@ -37,7 +40,7 @@ void fscan_posix(const char *path, metadata_read_f metaread, append_track_f appe
         || (0 == strcmp(entry.d_name, "..")))
         continue;
 
-      cx_string_t *fullname = cx_string_make(dirname->string);
+      cx_string_ptr fullname = cx_string_create(dirname->string);
       cx_string_append(fullname, "/");
       cx_string_append(fullname, entry.d_name);
 
@@ -45,17 +48,18 @@ void fscan_posix(const char *path, metadata_read_f metaread, append_track_f appe
       struct stat st;
       if (0 != lstat(fullname->string, &st)) {
         perror(fullname->string);
+        cx_release(fullname);
         continue;
       }
 
       /* add directory to to-scan list */
       if(S_ISDIR(st.st_mode)) {
-        cx_list_insert(queue, cx_string_make(fullname->string), NULL);
+        cx_list_insert(queue, fullname, NULL);
         /* scan regular file for metadata */
       } else if (S_ISREG(st.st_mode)) {
-        tags_t *tags = metaread.func(metaread.param, fullname->string);
+        tags_ptr tags = metaread.func(metaread.param, fullname->string);
         if (tags != NULL) {
-          track_info_t *track = track_info_make(fullname->string, tags);
+          track_info_ptr track = track_info_create(fullname->string, tags);
           append.func(append.param, track);
           cx_release(track);
           cx_release(tags);
@@ -66,6 +70,5 @@ void fscan_posix(const char *path, metadata_read_f metaread, append_track_f appe
     closedir(dir);
     cx_list_remove(nextdir);
   } /* for all dirs to scan */
-
   cx_release(queue);
 }
