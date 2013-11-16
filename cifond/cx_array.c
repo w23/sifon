@@ -7,6 +7,7 @@ static void cx_array_dtor(void *array) {
   cx_size_t i;
   for(i = 0; i < this->count; ++i)
     cx_release(this->objs[i]);
+  free(this->objs);
 }
 
 cx_array_ptr cx_array_create() {
