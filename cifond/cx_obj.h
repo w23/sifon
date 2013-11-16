@@ -33,4 +33,8 @@ void cx_release(void *o);
 #define CX_CREATE(T) ((T##_ptr)cx_create(sizeof(struct T##_t), T##_class_name, T##_dtor))
 #define CX_RETAIN(V,T) ((T##_ptr)cx_retain(V))
 
+#define CX_OBJ_BEGIN(N) struct N##_t { CX_O;
+#define CX_OBJ_END(N) }; \
+  typedef struct N##_t *N##_ptr;
+
 #endif /*ifndef __CX_OBJ_H__*/
