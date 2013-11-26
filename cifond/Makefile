@@ -1,5 +1,7 @@
-CFLAGS += -g -O0 `pkg-config --cflags libavformat libavutil` -Wall -Werror
+CFLAGS += -g -O0 -std=c99 `pkg-config --cflags libavformat libavutil` -Wall -Wextra -Werror -pedantic
 LDFLAGS += -lavformat `pkg-config --libs libavformat libavutil`
+
+CFLAGS += -D_POSIX_C_SOURCE=200112L
 
 MODULES = \
 	cx_array.o \
@@ -14,3 +16,6 @@ MODULES = \
 
 cifond: Makefile $(MODULES)
 	$(CC) $(MODULES) $(LDFLAGS) -o cifond
+
+clean:
+	@rm $(MODULES) cifond

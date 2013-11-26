@@ -3,6 +3,7 @@
 #include "meta_ffmpeg.h"
 
 static void dummy_append_track(void *param, track_info_ptr track) {
+  (void)param;
   fprintf(stdout, "Append track: %s\n  Tags(%zd):\n",
     track->filename->string, tags_count(track->tags));
   cx_size_t i;
