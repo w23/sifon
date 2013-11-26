@@ -2,7 +2,7 @@
 #include "cx_list.h"
 #include "fscan_posix.h"
 
-void fscan_posix(const char *path, struct metadata_read_f metaread,
+void fscan_posix(const char *path, struct track_info_read_f trackread,
   struct append_track_f append) {
   DIR *dir;
   struct dirent entry;
@@ -57,12 +57,10 @@ void fscan_posix(const char *path, struct metadata_read_f metaread,
         cx_list_insert(queue, fullname, NULL);
         /* scan regular file for metadata */
       } else if (S_ISREG(st.st_mode)) {
-        tags_ptr tags = metaread.func(metaread.param, fullname->string);
-        if (tags != NULL) {
-          track_info_ptr track = track_info_create(fullname->string, tags);
+        track_info_ptr track = trackread.func(trackread.param, fullname->string);
+        if (track != NULL) {
           append.func(append.param, track);
           cx_release(track);
-          cx_release(tags);
         }
       } /* if regular file */
       cx_release(fullname);
