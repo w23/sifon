@@ -30,7 +30,7 @@ void Scatter::add_preset(const std::string &preset, IEncoder *encoder) {
   if (preset == "origin" || presets_.count(preset) != 0)
     throw std::runtime_error("invalid preset name \"" + preset + "\"");
   
-  presets_.emplace(preset, std::unique_ptr<IEncoder>(encoder));
+  presets_.insert(std::make_pair(preset, std::unique_ptr<IEncoder>(encoder)));
 }
 
 IStream *Scatter::get_track_view(std::int64_t track_id,

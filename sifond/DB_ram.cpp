@@ -4,7 +4,7 @@ void DB_ram::insert(TrackInfo &info, TrackView &origin) {
   //! \todo why don't you check for duplicate tracks?
   //! \wontfix because its temporary you asshole!
   info.track_id = tracks_.empty() ? 0 : tracks_.crbegin()->first + 1;
-  tracks_.emplace(info.track_id, TrackFullInfo(info, origin));
+  tracks_.insert(std::make_pair(info.track_id, TrackFullInfo(info, origin)));
 }
 
 void DB_ram::insert(TrackView &view) {

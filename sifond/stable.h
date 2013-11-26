@@ -1,5 +1,7 @@
 #pragma once
 
+#include <signal.h>
+
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -7,6 +9,9 @@
 #include <mutex>
 #include <stdexcept>
 #include <fstream>
+#include <map>
+#include <sstream>
+#include <iostream>
 
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
@@ -22,5 +27,5 @@ extern "C" {
 #include <libavutil/dict.h>
 }
 
-#include <soci/soci.h>
-#include <soci/postgresql/soci-postgresql.h>
+//#include <soci/soci.h>
+//#include <soci/postgresql/soci-postgresql.h>
