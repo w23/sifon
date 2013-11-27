@@ -4,8 +4,17 @@
 
 static void dummy_append_track(void *param, track_info_ptr track) {
   (void)param;
-  fprintf(stdout, "Append track: %s\n  Tags(%zd):\n",
-    track->filename->string, tags_count(track->tags));
+  fprintf(stdout, "Append track: %s\n"
+    "  codec: %s\n"
+    "  bitrate: %d\n"
+    "  duration: %d\n"
+    "  samplerate: %d\n"
+    "  channels: %d\n"
+    "  Tags(%zd):\n",
+    track->filename->string, track->codec_name->string,
+    track->bitrate,
+    track->duration, track->sample_rate, track->channels,
+    tags_count(track->tags));
   cx_size_t i;
   for (i = 0; i < tags_count(track->tags); ++i)
     fprintf(stdout, "    %zd:%s = \"%s\"\n", i,

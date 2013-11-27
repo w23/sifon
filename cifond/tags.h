@@ -18,9 +18,4 @@ void tags_insert(tags_ptr tags, const char *key, const char *value);
 cx_size_t tags_count(tags_ptr);
 tag_ptr tags_get(tags_ptr, cx_size_t index);
 
-struct metadata_read_f {
-  void *param;
-  tags_ptr (*func)(void *param, const char *filename);
-};
-
 #endif /*ifndef __TAGS_H__*/
