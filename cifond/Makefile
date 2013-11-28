@@ -4,6 +4,7 @@ LDFLAGS += -lavformat `pkg-config --libs libavformat libavutil`
 CFLAGS += -D_POSIX_C_SOURCE=200112L
 
 MODULES = \
+	cx_log.o \
 	cx_array.o \
 	cx_list.o \
 	cx_obj.o \

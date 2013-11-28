@@ -1,11 +1,9 @@
 #include "extern.h"
+#include "cx_log.h"
 #include "meta_ffmpeg.h"
 
 static track_info_ptr read_track_info(AVFormatContext *fmt_ctx,
   const char *filename) {
-  int err = avformat_find_stream_info(fmt_ctx, NULL);
-  if (err < 0) return NULL;
-
   int duration;
   cx_u32_t flags = 0;
   int sample_rate;
@@ -13,6 +11,12 @@ static track_info_ptr read_track_info(AVFormatContext *fmt_ctx,
   int bitrate;
   int audio_streams = 0;
   cx_string_ptr codec_name = NULL;
+
+  int err = avformat_find_stream_info(fmt_ctx, NULL);
+  if (err < 0) {
+    CX_LOG_INFO("(%s) cannot find any media streams", filename);
+    return NULL;
+  }
 
   for (unsigned i = 0; i < fmt_ctx->nb_streams; ++i) {
     AVStream *st = fmt_ctx->streams[i];
@@ -25,14 +29,14 @@ static track_info_ptr read_track_info(AVFormatContext *fmt_ctx,
       bitrate = st->codec->bit_rate / 1000;
       /// \todo lossless?
     } else if (st->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
-      /// \todo log this "files with video are not supported"
+      CX_LOG_INFO("(%s) found video stream, skipping file", filename);
       cx_release(codec_name);
       return NULL;
     }
   }
 
   if (audio_streams != 1) {
-    /// \todo log this
+    CX_LOG_INFO("(%s) no audio streams found", filename);
     cx_release(codec_name);
     return NULL;
   }
@@ -56,10 +60,14 @@ static track_info_ptr read_track_info(AVFormatContext *fmt_ctx,
 
 static track_info_ptr track_info_ffmpeg_func(void *p, const char *filename) {
   (void)p;
-  // Open file
+  CX_LOG_DEBUG("(%s) probing file", filename);
+
   AVFormatContext *fmt_ctx = NULL;
   int err = avformat_open_input(&fmt_ctx, filename, NULL, NULL);
-  if (err != 0) return NULL;
+  if (err != 0) {
+    CX_LOG_INFO("(%s) cannot open file", filename);
+    return NULL;
+  }
 
   track_info_ptr track = read_track_info(fmt_ctx, filename);
   avformat_close_input(&fmt_ctx);

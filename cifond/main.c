@@ -1,6 +1,7 @@
 #include "extern.h"
 #include "fscan_posix.h"
 #include "meta_ffmpeg.h"
+#include "cx_log.h"
 
 static void dummy_append_track(void *param, track_info_ptr track) {
   (void)param;
@@ -27,6 +28,11 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Usage: %s <path_to_scan>\n", argv[0]);
     return 1;
   }
+
+  cx_log_level = CX_LOG_LEVEL_DEBUG;
+
+  CX_LOG("################");
+  CX_LOG("Staring cifond with media source dir %s", argv[1]);
 
   av_register_all();
 
