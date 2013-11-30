@@ -1,7 +1,7 @@
 #ifndef __KEEPER_H__
 #define __KEEPER_H__
 
-#include "cx_iterator.h"
+#include "cx_array.h"
 #include "track_info.h"
 
 CX_OBJ_BEGIN(keeper)
@@ -18,7 +18,8 @@ keeper_ptr keeper_create(const char *filename);
  */
 keeper_ptr keeper_copy(keeper_ptr keeper);
 
-cx_iterator_ptr keeper_track_find(keeper_ptr kpr, cx_string_ptr needle);
+cx_array_ptr keeper_track_find(keeper_ptr kpr, cx_string_ptr needle,
+  int offset, int count);
 
 void keeper_track_insert(keeper_ptr kpr, track_info_ptr track);
 

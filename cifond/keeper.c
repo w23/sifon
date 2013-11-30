@@ -40,7 +40,7 @@ static void stmt_dtor(void *stmt) {
   sqlite3_finalize(this->stmt);
 }
 
-static void keeper_dtor(void *keeper){
+static void keeper_dtor(void *keeper) {
   keeper_ptr this = (keeper_ptr)keeper;
   cx_release(this->impl);
 }
@@ -98,15 +98,17 @@ static int stmt_bind_string(stmt_ptr this, int index, const cx_string_ptr value)
   return err;
 }
 
-static int stmt_exec(stmt_ptr this) {
+static int stmt_column_int(stmt_ptr this, int index) {
+  return sqlite3_column_int(this->stmt, index);
+}
+
+static cx_string_ptr stmt_column_string(stmt_ptr this, int index) {
+  return cx_string_create((const char*)sqlite3_column_text(this->stmt, index));
+}
+
+static int stmt_exec(stmt_ptr this, int expect) {
   int result = sqlite3_step(this->stmt);
-  switch (result) {
-  case SQLITE_DONE:
-    return SQLITE_OK;
-  case SQLITE_ROW:
-    CX_LOG_WARNING("Statement returns an unexpected result.");
-    return SQLITE_OK;
-  }
+  if (expect == result) return 0;
   CX_LOG_ERROR("Error executing statement: (%d) %s", result,
     sqlite3_errstr(result));
   return -1;
@@ -145,7 +147,7 @@ static void impl_init_statements(cx_obj_ptr impl) {
 
   this->track_find = stmt_create(this,
     "SELECT DISTINCT tag_rels.track_id FROM tag_rels, tags "
-    "WHERE tags.value MATCH ? AND tags.docid = tag_rels.tag_id");
+    "WHERE tags.value MATCH ? AND tags.docid = tag_rels.tag_id LIMIT ? OFFSET ?");
 
   this->track_tags = stmt_create(this,
     "SELECT tags.key, tags.value FROM tags, tag_rels WHERE "
@@ -197,11 +199,39 @@ keeper_ptr keeper_copy(keeper_ptr keeper) {
   return this;
 }
 
-cx_iterator_ptr keeper_track_find(keeper_ptr keeper, cx_string_ptr needle) {
-  CX_UNUSED(keeper);
+cx_array_ptr keeper_track_find(keeper_ptr keeper, cx_string_ptr needle,
+  int offset, int count) {
+  sqlite_ptr impl = (sqlite_ptr)keeper->impl;
+  stmt_ptr find = impl->track_find;
+  stmt_ptr tags = impl->track_tags;
   CX_LOG_INFO("Search for tracks with \"%s\"", needle->string);
-  CX_LOG_ERROR("Not implemented");
-  return NULL;
+
+  stmt_reset(find);
+  stmt_bind_string(find, 0, needle);
+  stmt_bind_int(find, 1, count);
+  stmt_bind_int(find, 2, offset);
+  cx_array_ptr array = cx_array_create();
+  while (stmt_exec(find, SQLITE_ROW) == 0) {
+    int track_id = stmt_column_int(find, 0);
+    
+    tags_ptr ttags = tags_create();
+    stmt_reset(tags);
+    stmt_bind_int(tags, 0, track_id);
+    while (stmt_exec(tags, SQLITE_ROW) == 0) {
+      cx_string_ptr key = stmt_column_string(tags, 0);
+      cx_string_ptr value = stmt_column_string(tags, 1);
+      tags_insert_string(ttags, key, value);
+      cx_release(key);
+      cx_release(value);
+    }
+
+    track_info_ptr track = track_info_create(NULL, ttags);
+    track->id = track_id;
+    cx_array_insert_back(array, track);
+    cx_release(ttags);
+    cx_release(track);
+  }
+  return array;
 }
 
 void keeper_track_insert(keeper_ptr keeper, track_info_ptr track) {
@@ -226,7 +256,7 @@ void keeper_track_insert(keeper_ptr keeper, track_info_ptr track) {
 
   stmt_reset(impl->track_insert);
   stmt_bind_string(impl->track_insert, 0, track->filename);
-  if (0 != stmt_exec(impl->track_insert)) {
+  if (0 != stmt_exec(impl->track_insert, SQLITE_DONE)) {
     CX_LOG_INFO("Track \"%s\" already exists in database",
       track->filename->string);
     return;
@@ -239,13 +269,13 @@ void keeper_track_insert(keeper_ptr keeper, track_info_ptr track) {
     stmt_reset(impl->tags_insert);
     stmt_bind_string(impl->tags_insert, 0, tags_get(track->tags, i)->key);
     stmt_bind_string(impl->tags_insert, 1, tags_get(track->tags, i)->value);
-    stmt_exec(impl->tags_insert);
+    stmt_exec(impl->tags_insert, SQLITE_DONE);
 
     int tag_id = sqlite3_last_insert_rowid(impl->db);
     stmt_reset(impl->tag_rels_insert);
     stmt_bind_int(impl->tag_rels_insert, 0, track->id);
     stmt_bind_int(impl->tag_rels_insert, 1, tag_id);
-    stmt_exec(impl->tag_rels_insert);
+    stmt_exec(impl->tag_rels_insert, SQLITE_DONE);
   }
 }
 

@@ -15,6 +15,7 @@ typedef cx_array_ptr tags_ptr;
 
 tags_ptr tags_create();
 void tags_insert(tags_ptr tags, const char *key, const char *value);
+void tags_insert_string(tags_ptr tags, cx_string_ptr key, cx_string_ptr value);
 cx_size_t tags_count(tags_ptr);
 tag_ptr tags_get(tags_ptr, cx_size_t index);
 
