@@ -1,5 +1,5 @@
 CFLAGS += -g -O0 -std=c99 `pkg-config --cflags libavformat libavutil` -Wall -Wextra -Werror -pedantic
-LDFLAGS += -lavformat `pkg-config --libs libavformat libavutil`
+LDFLAGS += -lavformat `pkg-config --libs libavformat libavutil sqlite3`
 
 CFLAGS += -D_POSIX_C_SOURCE=200112L
 
