@@ -130,6 +130,7 @@ static keeper_ptr keeper_raw_create() {
 
   keeper_ptr this = CX_CREATE(keeper);
   this->impl = (cx_obj_ptr)impl;
+  keeper_exec(this, "PRAGMA synchronous=OFF");
   return this;
 }
 
@@ -236,7 +237,6 @@ cx_array_ptr keeper_track_find(keeper_ptr keeper, cx_string_ptr needle,
 
 void keeper_track_insert(keeper_ptr keeper, track_info_ptr track) {
   sqlite_ptr impl = (sqlite_ptr)keeper->impl;
-  CX_LOG_ERROR("Not implemented");
   CX_LOG_DEBUG("Append track: %s\n"
     "  codec: %s\n"
     "  bitrate: %d\n"
@@ -263,7 +263,7 @@ void keeper_track_insert(keeper_ptr keeper, track_info_ptr track) {
   }
 
   track->id = sqlite3_last_insert_rowid(impl->db);
-  CX_LOG_DEBUG("Track \"%s\" id = %d", track->filename, track->id);
+  CX_LOG_DEBUG("Track \"%s\" id = %d", track->filename->string, track->id);
   
   for (i = 0; i < tags_count(track->tags); ++i) {
     stmt_reset(impl->tags_insert);
