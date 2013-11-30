@@ -10,9 +10,10 @@ static void cx_string_dtor(void *s) {
 
 cx_string_ptr cx_string_create(const char *source) {
   cx_string_ptr this = CX_CREATE(cx_string);
-  this->length = strlen(source);
+  this->length = (source!=NULL)?strlen(source):0;
   this->string = malloc(this->length + 1);
-  memcpy(this->string, source, this->length + 1);
+  memcpy(this->string, source, this->length);
+  this->string[this->length] = 0;
   return this;
 }
 
