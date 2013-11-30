@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   sourcer_start(keeper, storage);
   instancer_start();
 
-  int result = server_run(NULL, 8080);
+  int result = server_run(keeper, NULL, 8080);
 
   instancer_stop();
   sourcer_stop();
