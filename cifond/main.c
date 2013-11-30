@@ -8,8 +8,8 @@
 int main(int argc, char *argv[]) {
   const char *storage;
 
-  if (argc < 2) {
-    fprintf(stderr, "Usage: %s <path_to_scan>\n", argv[0]);
+  if (argc < 3) {
+    fprintf(stderr, "Usage: %s <path_to_scan> <filename.sqlite>\n", argv[0]);
     return 1;
   }
 
@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 
   av_register_all();
 
-  keeper_ptr keeper = keeper_create("/tmp/sifon.sqlite");
+  keeper_ptr keeper = keeper_create(argv[2]);
 
   sourcer_start(keeper, storage);
   instancer_start();
