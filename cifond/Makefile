@@ -9,7 +9,10 @@ MODULES = \
 	cx_list.o \
 	cx_obj.o \
 	cx_string.o \
-	fscan_posix.o \
+	instancer.o \
+	keeper.o \
+	server.o \
+	sourcer.o \
 	main.o \
 	track_info.o \
 	meta_ffmpeg.o \

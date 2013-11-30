@@ -2,9 +2,12 @@
 #define __TRACK_INFO_H__
 #include "tags.h"
 
-extern const char *track_info_clas_name;
+extern const char *track_info_class_name;
 
-struct track_info_t { CX_O;
+typedef cx_u32_t track_id_t;
+
+CX_OBJ_BEGIN(track_info)
+  track_id_t id;
   cx_string_ptr filename;
   cx_u32_t flags;
   int duration;
@@ -13,10 +16,20 @@ struct track_info_t { CX_O;
   int bitrate;
   cx_string_ptr codec_name;
   tags_ptr tags;
-};
-typedef struct track_info_t *track_info_ptr;
+CX_OBJ_END(track_info)
 
 #define TRACK_INFO_FLAG_LOSSLESS 1
+
+CX_OBJ_BEGIN(track_instance)
+  track_id_t id;
+  cx_string_ptr preset;
+  int status;
+  cx_string_ptr filename;
+CX_OBJ_END(track_instance)
+
+#define TRACK_INSTANCE_STATUS_NONE 0
+#define TRACK_INSTANCE_STATUS_PROCESSING 1
+#define TRACK_INSTANCE_STATUS_READY 2
 
 track_info_ptr track_info_create(const char *filename, tags_ptr tags);
 

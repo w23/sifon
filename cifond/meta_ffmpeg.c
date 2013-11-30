@@ -58,8 +58,7 @@ static track_info_ptr read_track_info(AVFormatContext *fmt_ctx,
   return track;
 }
 
-static track_info_ptr track_info_ffmpeg_func(void *p, const char *filename) {
-  (void)p;
+track_info_ptr ffmpeg_metadata(const char *filename) {
   CX_LOG_DEBUG("(%s) probing file", filename);
 
   AVFormatContext *fmt_ctx = NULL;
@@ -73,9 +72,3 @@ static track_info_ptr track_info_ffmpeg_func(void *p, const char *filename) {
   avformat_close_input(&fmt_ctx);
   return track;
 }
-
-const struct track_info_read_f meta_ffmpeg = {
-  NULL,
-  track_info_ffmpeg_func
-};
-

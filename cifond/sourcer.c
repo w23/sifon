@@ -1,9 +1,17 @@
 #include "extern.h"
+#include "cx_log.h"
 #include "cx_list.h"
-#include "fscan_posix.h"
+#include "keeper.h"
+#include "meta_ffmpeg.h"
+#include "sourcer.h"
 
-void fscan_posix(const char *path, struct track_info_read_f trackread,
-  struct append_track_f append) {
+static keeper_ptr the_keeper;
+
+static void process_track(track_info_ptr track) {
+  keeper_track_insert(the_keeper, track);
+}
+
+static void scan_filesystem(const char *path) {
   DIR *dir;
   struct dirent entry;
   struct dirent *pentry;
@@ -57,9 +65,9 @@ void fscan_posix(const char *path, struct track_info_read_f trackread,
         cx_list_insert(queue, fullname, NULL);
         /* scan regular file for metadata */
       } else if (S_ISREG(st.st_mode)) {
-        track_info_ptr track = trackread.func(trackread.param, fullname->string);
+        track_info_ptr track = ffmpeg_metadata(fullname->string);
         if (track != NULL) {
-          append.func(append.param, track);
+          process_track(track);
           cx_release(track);
         }
       } /* if regular file */
@@ -69,4 +77,15 @@ void fscan_posix(const char *path, struct track_info_read_f trackread,
     cx_list_remove(nextdir);
   } /* for all dirs to scan */
   cx_release(queue);
+}
+
+void sourcer_start(keeper_ptr keeper, const char *media_storage) {
+  CX_LOG("Starting sourcer on dir %s", media_storage);
+  the_keeper = keeper_copy(keeper);
+  scan_filesystem(media_storage);
+}
+
+void sourcer_stop() {
+  CX_LOG("Stopping sourcer");
+  cx_release(the_keeper);
 }
