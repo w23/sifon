@@ -149,8 +149,8 @@ static void impl_init_statements(cx_obj_ptr impl) {
     "INSERT OR ROLLBACK INTO tracks (filename) VALUES (?)");
 
   this->track_find = stmt_create(this,
-    "SELECT DISTINCT tag_rels.track_id FROM tag_rels, tags "
-    "WHERE tags.value MATCH ? AND tags.docid = tag_rels.tag_id LIMIT ? OFFSET ?");
+    "SELECT track_id FROM tag_rels WHERE tag_id IN "
+    "(SELECT docid FROM tags WHERE value MATCH ? LIMIT ? OFFSET ?)");
 
   this->track_tags = stmt_create(this,
     "SELECT tags.key, tags.value FROM tags, tag_rels WHERE "
@@ -186,6 +186,12 @@ keeper_ptr keeper_create(const char *filename) {
         "status INTEGER,"
         "filename TEXT UNIQUE,"
         "UNIQUE(track_id, preset)"
+      ")")) || (SQLITE_OK != keeper_exec(this,
+      "CREATE INDEX IF NOT EXISTS tag_rels_idx ON tag_rels ("
+        "track_id, tag_id"
+      ")")) || (SQLITE_OK != keeper_exec(this,
+      "CREATE INDEX IF NOT EXISTS tracks_idx ON tracks ("
+        "id, filename"
       ")"))) {
     CX_LOG_ERROR("Error creating tables");
     cx_release(this);
@@ -206,6 +212,7 @@ keeper_ptr keeper_copy(keeper_ptr keeper) {
 }
 
 static tags_ptr impl_read_track_tags(sqlite_ptr impl, track_id_t id) {
+  CX_LOG_DEBUG("Getting tags for track %d", id);
   stmt_ptr tags = impl->track_tags;
   tags_ptr ttags = tags_create();
   stmt_reset(tags);
@@ -252,6 +259,7 @@ cx_array_ptr keeper_track_find(keeper_ptr keeper, cx_string_ptr needle,
   cx_array_ptr array = cx_array_create();
   while (stmt_exec(find, SQLITE_ROW) == 0) {
     int track_id = stmt_column_int(find, 0);
+    CX_LOG_DEBUG("Found track %d", track_id);
     
     tags_ptr ttags = impl_read_track_tags(impl, track_id);
     track_info_ptr track = track_info_create(NULL, ttags);
