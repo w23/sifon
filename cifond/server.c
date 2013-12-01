@@ -44,6 +44,34 @@ static void request_search(struct evhttp_request *req, const char *needle) {
   cx_release(tracks);
 }
 
+static void request_get(struct evhttp_request *req, const char *track_id) {
+  track_id_t id = atoi(track_id);
+  CX_LOG_INFO("Requested track %d", id);
+  track_info_ptr track = keeper_track_get(keeper, id);
+  FILE *f = fopen(track->filename->string, "rb");
+  if (f == NULL) {
+    CX_LOG_ERROR("Cannot open track %d file \"%s\"", id, track->filename->string);
+    evhttp_send_reply(req, 404, "NASHI", NULL);
+    return;
+  }
+
+  evhttp_add_header(evhttp_request_get_output_headers(req),
+                   "Content-Type", "audio");
+  evhttp_send_reply_start(req, 200, "OK");
+  struct evbuffer *chunkbuffer = evbuffer_new();
+  char buffer[16384];
+  for (;;) {
+    size_t size = fread(buffer, 1, sizeof(buffer), f);
+    if (size == 0) break;
+    evbuffer_add(chunkbuffer, buffer, size);
+    evhttp_send_reply_chunk(req, chunkbuffer);
+  }
+  evbuffer_free(chunkbuffer);
+  evhttp_send_reply_end(req);
+
+  cx_release(track);
+}
+
 static void callback_http_request(struct evhttp_request *req, void *arg) {
   CX_UNUSED(arg);
   CX_LOG_INFO("HTTP request: %s", evhttp_request_get_uri(req));
@@ -52,6 +80,11 @@ static void callback_http_request(struct evhttp_request *req, void *arg) {
     request_search(req, path + 8);
     return;
   }
+  if (strncmp(path, "/get/", 5) == 0) {
+    request_get(req, path + 5);
+    return;
+  }
+  evhttp_send_reply(req, 404, "OH NOES", NULL);
 }
 
 int server_run(keeper_ptr inkeeper, const char *bind_host, int port) {
