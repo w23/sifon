@@ -21,6 +21,7 @@ CX_OBJ_BEGIN(sqlite)
   stmt_ptr track_insert;
   stmt_ptr track_find;
   stmt_ptr track_tags;
+  stmt_ptr track_get;
 CX_OBJ_END(sqlite)
 
 #define KEEPER_DB(keeper) (((sqlite_ptr)((keeper)->impl))->db)
@@ -32,6 +33,7 @@ static void sqlite_dtor(void *sqlite) {
   cx_release(this->track_insert);
   cx_release(this->track_find);
   cx_release(this->track_tags);
+  cx_release(this->track_get);
   sqlite3_close(this->db);
 }
 
@@ -153,6 +155,9 @@ static void impl_init_statements(cx_obj_ptr impl) {
   this->track_tags = stmt_create(this,
     "SELECT tags.key, tags.value FROM tags, tag_rels WHERE "
     "tag_rels.track_id = ? AND tags.docid = tag_rels.tag_id");
+
+  this->track_get = stmt_create(this,
+    "SELECT filename FROM tracks WHERE id = ?");
 }
 
 keeper_ptr keeper_create(const char *filename) {
@@ -200,11 +205,44 @@ keeper_ptr keeper_copy(keeper_ptr keeper) {
   return this;
 }
 
+static tags_ptr impl_read_track_tags(sqlite_ptr impl, track_id_t id) {
+  stmt_ptr tags = impl->track_tags;
+  tags_ptr ttags = tags_create();
+  stmt_reset(tags);
+  stmt_bind_int(tags, 0, id);
+  while (stmt_exec(tags, SQLITE_ROW) == 0) {
+    cx_string_ptr key = stmt_column_string(tags, 0);
+    cx_string_ptr value = stmt_column_string(tags, 1);
+    tags_insert_string(ttags, key, value);
+    cx_release(key);
+    cx_release(value);
+  }
+  return ttags;
+}
+
+track_info_ptr keeper_track_get(keeper_ptr keeper, track_id_t id) {
+  CX_LOG_INFO("getting track %d", id);
+  sqlite_ptr impl = (sqlite_ptr)keeper->impl;
+  stmt_ptr get = impl->track_get;
+  stmt_reset(get);
+  stmt_bind_int(get, 0, id);
+  if (stmt_exec(get, SQLITE_ROW) != 0) {
+    CX_LOG_WARNING("No track with id %d found", id);
+    return NULL;
+  }
+
+  cx_string_ptr filename = stmt_column_string(get, 0);
+  tags_ptr tags = impl_read_track_tags(impl, id);
+  track_info_ptr track = track_info_create(filename->string, tags);
+  cx_release(tags);
+  cx_release(filename);
+  return track;
+}
+
 cx_array_ptr keeper_track_find(keeper_ptr keeper, cx_string_ptr needle,
   int offset, int count) {
   sqlite_ptr impl = (sqlite_ptr)keeper->impl;
   stmt_ptr find = impl->track_find;
-  stmt_ptr tags = impl->track_tags;
   CX_LOG_INFO("Search for tracks with \"%s\"", needle->string);
 
   stmt_reset(find);
@@ -215,17 +253,7 @@ cx_array_ptr keeper_track_find(keeper_ptr keeper, cx_string_ptr needle,
   while (stmt_exec(find, SQLITE_ROW) == 0) {
     int track_id = stmt_column_int(find, 0);
     
-    tags_ptr ttags = tags_create();
-    stmt_reset(tags);
-    stmt_bind_int(tags, 0, track_id);
-    while (stmt_exec(tags, SQLITE_ROW) == 0) {
-      cx_string_ptr key = stmt_column_string(tags, 0);
-      cx_string_ptr value = stmt_column_string(tags, 1);
-      tags_insert_string(ttags, key, value);
-      cx_release(key);
-      cx_release(value);
-    }
-
+    tags_ptr ttags = impl_read_track_tags(impl, track_id);
     track_info_ptr track = track_info_create(NULL, ttags);
     track->id = track_id;
     cx_array_insert_back(array, track);
