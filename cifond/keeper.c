@@ -55,6 +55,7 @@ static stmt_ptr stmt_create(sqlite_ptr impl, const char *sql) {
   if (err != SQLITE_OK) {
     CX_LOG_ERROR("Error creating prepared statement with SQL {%s}: %s", sql,
       sqlite3_errmsg(impl->db));
+    exit(-1);
     return NULL;
   }
 
@@ -111,8 +112,9 @@ static cx_string_ptr stmt_column_string(stmt_ptr this, int index) {
 static int stmt_exec(stmt_ptr this, int expect) {
   int result = sqlite3_step(this->stmt);
   if (expect == result) return 0;
-  CX_LOG_ERROR("Error executing statement: (%d) %s", result,
-    sqlite3_errstr(result));
+  if (SQLITE_DONE != result)
+    CX_LOG_ERROR("Error executing statement: (%d) %s", result,
+      sqlite3_errstr(result));
   return -1;
 }
 
@@ -146,7 +148,8 @@ static void impl_init_statements(cx_obj_ptr impl) {
     "INSERT OR ROLLBACK INTO tags (key, value) VALUES (?, ?)");
 
   this->track_insert = stmt_create(this,
-    "INSERT OR ROLLBACK INTO tracks (filename) VALUES (?)");
+    "INSERT OR ROLLBACK INTO tracks (filename,codec,bitrate,duration) "
+    "VALUES (?,?,?,?)");
 
   this->track_find = stmt_create(this,
     "SELECT track_id FROM tag_rels WHERE tag_id IN "
@@ -173,7 +176,10 @@ keeper_ptr keeper_create(const char *filename) {
   if ((SQLITE_OK != keeper_exec(this,
       "CREATE TABLE IF NOT EXISTS tracks ("
         "id INTEGER PRIMARY KEY,"
-        "filename TEXT UNIQUE"
+        "filename TEXT UNIQUE,"
+        "codec TEXT,"
+        "bitrate INTEGER,"
+        "duration INTEGER"
       ")")) || (SQLITE_OK != keeper_exec(this,
       "CREATE TABLE IF NOT EXISTS tag_rels ("
         "track_id INTEGER, tag_id INTEGER, UNIQUE(track_id, tag_id)"
@@ -264,6 +270,9 @@ cx_array_ptr keeper_track_find(keeper_ptr keeper, cx_string_ptr needle,
     tags_ptr ttags = impl_read_track_tags(impl, track_id);
     track_info_ptr track = track_info_create(NULL, ttags);
     track->id = track_id;
+    //track->codec_name = stmt_column_string(find, 1);
+    //track->bitrate = stmt_column_int(find, 2);
+    //track->duration = stmt_column_int(find, 3);
     cx_array_insert_back(array, track);
     cx_release(ttags);
     cx_release(track);
@@ -273,7 +282,7 @@ cx_array_ptr keeper_track_find(keeper_ptr keeper, cx_string_ptr needle,
 
 void keeper_track_insert(keeper_ptr keeper, track_info_ptr track) {
   sqlite_ptr impl = (sqlite_ptr)keeper->impl;
-  CX_LOG_DEBUG("Append track: %s\n"
+  /*CX_LOG_DEBUG("Append track: %s\n"
     "  codec: %s\n"
     "  bitrate: %d\n"
     "  duration: %d\n"
@@ -288,10 +297,15 @@ void keeper_track_insert(keeper_ptr keeper, track_info_ptr track) {
   for (i = 0; i < tags_count(track->tags); ++i)
     CX_LOG_DEBUG("    %zd:%s = \"%s\"", i,
       tags_get(track->tags, i)->key->string,
-      tags_get(track->tags, i)->value->string);
+      tags_get(track->tags, i)->value->string);*/
+  if (tags_count(track->tags) == 0)
+    CX_LOG_WARNING("Track \"%s\" has no tags!", track->filename->string);
 
   stmt_reset(impl->track_insert);
   stmt_bind_string(impl->track_insert, 0, track->filename);
+  stmt_bind_string(impl->track_insert, 1, track->codec_name);
+  stmt_bind_int(impl->track_insert, 2, track->bitrate);
+  stmt_bind_int(impl->track_insert, 3, track->duration);
   if (0 != stmt_exec(impl->track_insert, SQLITE_DONE)) {
     CX_LOG_INFO("Track \"%s\" already exists in database",
       track->filename->string);
@@ -301,7 +315,7 @@ void keeper_track_insert(keeper_ptr keeper, track_info_ptr track) {
   track->id = sqlite3_last_insert_rowid(impl->db);
   CX_LOG_DEBUG("Track \"%s\" id = %d", track->filename->string, track->id);
   
-  for (i = 0; i < tags_count(track->tags); ++i) {
+  for (unsigned i = 0; i < tags_count(track->tags); ++i) {
     stmt_reset(impl->tags_insert);
     stmt_bind_string(impl->tags_insert, 0, tags_get(track->tags, i)->key);
     stmt_bind_string(impl->tags_insert, 1, tags_get(track->tags, i)->value);
