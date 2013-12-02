@@ -7,6 +7,7 @@
 #include <sys/queue.h> // TAILQ
 #include "cx_log.h"
 #include "keeper.h"
+#include "instancer.h"
 #include "server.h"
 
 struct event_base *ev_base;
@@ -51,7 +52,17 @@ static void request_get(struct evhttp_request *req, const char *track_id) {
   FILE *f = fopen(track->filename->string, "rb");
   if (f == NULL) {
     CX_LOG_ERROR("Cannot open track %d file \"%s\"", id, track->filename->string);
-    evhttp_send_reply(req, 404, "NASHI", NULL);
+    evhttp_send_reply(req, 404, "INVALID TRACK", NULL);
+    return;
+  }
+
+  const char *preset = strchr(track_id, '/');
+  if (preset != NULL) preset += 1;
+  cx_stream_ptr stream = instance_track(track, preset);
+
+  if (stream == NULL) {
+    CX_LOG_ERROR("Cannot open track %d preset \"%s\"", id, preset);
+    evhttp_send_reply(req, 404, "INVALID PRESET OR FILE", NULL);
     return;
   }
 
@@ -59,16 +70,15 @@ static void request_get(struct evhttp_request *req, const char *track_id) {
                    "Content-Type", "audio");
   evhttp_send_reply_start(req, 200, "OK");
   struct evbuffer *chunkbuffer = evbuffer_new();
-  char buffer[16384];
   for (;;) {
-    size_t size = fread(buffer, 1, sizeof(buffer), f);
-    if (size == 0) break;
-    evbuffer_add(chunkbuffer, buffer, size);
+	struct cx_packet_t pkt = CX_STREAM_READ(stream);
+    if (pkt.size == 0) break;
+    evbuffer_add(chunkbuffer, pkt.data, pkt.size);
     evhttp_send_reply_chunk(req, chunkbuffer);
   }
   evbuffer_free(chunkbuffer);
+  cx_release(stream);
   evhttp_send_reply_end(req);
-
   cx_release(track);
 }
 

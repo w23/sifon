@@ -2,13 +2,9 @@
 #define __INSTANCER_H__
 
 #include "track_info.h"
-#include "keeper.h"
+#include "cx_stream.h"
 
-void instancer_start();
-void instancer_stop();
-
-track_instance_ptr instance_track(keeper_ptr keeper,
-  track_id_t id, const char *preset);
+cx_stream_ptr instance_track(track_info_ptr track, const char *preset);
 
 #endif /*ifndef __INSTANCER_H__*/
 

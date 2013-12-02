@@ -25,20 +25,4 @@ track_info_ptr keeper_track_get(keeper_ptr keeper, track_id_t id);
 
 void keeper_track_insert(keeper_ptr kpr, track_info_ptr track);
 
-/*! \brief get track instance by id and preset
- *
- * fills instance with status and payload (if possible)
- */
-void keeper_instance_get(keeper_ptr, track_instance_ptr instance);
-
-/*! creates new instance for id+preset
- *
- * stores status and filename
- */
-int keeper_instance_insert(keeper_ptr, track_instance_ptr instance);
-
-/*! stores new status and filename for id+preset
- */
-void keeper_instance_update(keeper_ptr, track_instance_ptr instance);
-
 #endif /*ifndef __KEEPER_H__*/

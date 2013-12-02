@@ -315,23 +315,3 @@ void keeper_track_insert(keeper_ptr keeper, track_info_ptr track) {
   }
 }
 
-void keeper_instance_get(keeper_ptr keeper, track_instance_ptr instance) {
-  CX_UNUSED(keeper);
-  CX_UNUSED(instance);
-  CX_LOG_ERROR("Not implemented");
-}
-
-int keeper_instance_insert(keeper_ptr keeper, track_instance_ptr instance) {
-  CX_UNUSED(keeper);
-  CX_UNUSED(instance);
-  CX_LOG_ERROR("Not implemented");
-  return 0;
-}
-
-void keeper_instance_update(keeper_ptr keeper, track_instance_ptr instance) {
-  CX_UNUSED(keeper);
-  CX_UNUSED(instance);
-  CX_LOG_ERROR("Not implemented");
-}
-
-

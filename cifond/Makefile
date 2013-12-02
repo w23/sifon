@@ -9,6 +9,7 @@ MODULES = \
 	cx_list.o \
 	cx_obj.o \
 	cx_string.o \
+	cx_stream.o \
 	instancer.o \
 	keeper.o \
 	server.o \

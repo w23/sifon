@@ -24,11 +24,9 @@ int main(int argc, char *argv[]) {
   keeper_ptr keeper = keeper_create(argv[2]);
 
   sourcer_start(keeper, storage);
-  instancer_start();
 
   int result = server_run(keeper, NULL, 8080);
 
-  instancer_stop();
   sourcer_stop();
   cx_release(keeper);
 

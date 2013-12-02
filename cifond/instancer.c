@@ -1,16 +1,11 @@
 #include "cx_log.h"
 #include "instancer.h"
 
-void instancer_start() {
-}
+cx_stream_ptr instance_track(track_info_ptr track, const char *preset) {
+  if (preset == NULL)
+    return cx_stream_create_file(track->filename->string);
 
-void instancer_stop() {
-}
-
-track_instance_ptr instance_track(keeper_ptr keeper,
-  track_id_t id, const char *preset) {
-  CX_UNUSED(keeper);
-  CX_LOG_INFO("Instance %d/%s", id, preset);
+  CX_LOG_INFO("Building instance %d/%s", track->id, preset);
   CX_LOG_ERROR("Not implemented");
   return NULL;
 }
