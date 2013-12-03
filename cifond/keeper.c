@@ -247,6 +247,7 @@ track_info_ptr keeper_track_get(keeper_ptr keeper, track_id_t id) {
   cx_string_ptr filename = stmt_column_string(get, 0);
   tags_ptr tags = impl_read_track_tags(impl, id);
   track_info_ptr track = track_info_create(filename->string, tags);
+  track->id = id;
   cx_release(tags);
   cx_release(filename);
   return track;
