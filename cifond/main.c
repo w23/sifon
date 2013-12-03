@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
   CX_LOG("Staring cifond with media source dir %s", storage);
 
   av_register_all();
+  avcodec_register_all();
 
   keeper_ptr keeper = keeper_create(argv[2]);
 

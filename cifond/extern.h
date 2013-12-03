@@ -12,6 +12,8 @@
 #include <unistd.h>
 
 #include <libavformat/avformat.h>
+#include <libavutil/avutil.h>
+#include <libavcodec/avcodec.h>
 
 #endif /*ifndef __EXTERN_H__*/
 
