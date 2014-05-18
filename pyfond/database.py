@@ -14,7 +14,6 @@ class DummyDatabase:
         return self._tracks[:]
 
     def find(self, tags):
-
         class AnyTagIterator:
             def __init__(self, tracks, value):
                 self._tracks = tracks[:]
@@ -22,9 +21,9 @@ class DummyDatabase:
 
             def __iter__(self):
                 for track in self._tracks:
-                    for tag, values in track.tags.items():
-                        for value in values:
-                            if self._value in value.casefold():
-                                yield track
+                    for tag, value in track.tags.items():
+                        if self._value in value.casefold():
+                            yield track
+                            break
         return AnyTagIterator(self._tracks, tags[''])
 
