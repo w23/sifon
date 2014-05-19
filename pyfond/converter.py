@@ -39,7 +39,7 @@ class Converter:
             logging.info('"%s" isntance %s is at %d%%', track.id, profile, instance.progress)
             status.done = False
             status.progress = instance.progress
-            status.eta = intsance.eta
+            status.eta = instance.eta
         elif instance.aborted:
             logging.info('"%s" isntance %s was aborted', track.id, profile)
             status.done = False
@@ -51,7 +51,7 @@ class Converter:
             status.done = True
             status.progress = 100
             status.eta = 0
-            status.url = self._url_prefix + instance.output
+            status.url = self.__url_prefix + instance.output
             status.mime = instance.mime
         return status
 
@@ -157,38 +157,49 @@ class DummyDatabase:
         return self
 
     def instance_get(self, track, profile):
+        logging.info("instance_get: %s, %s", track, profile)
         instance = self.Instance(track, profile)
         with self.__lock:
             try:
                 index = self.__instances.index(instance)
-                instance = self.__instances[index]
-                return instance
+                logging.info("found: %d", index)
+                return self.__instances[index]
             except:
+                logging.info("not found")
                 instance.name = str(self.__counter)
                 self.__counter = self.__counter + 1
                 self.__instances.append(instance)
         return instance
 
     def instance_update(self, track, profile, progress, eta):
+        logging.info("instance_update: %s, %s -> %d :%d", track, profile, progress, eta)
         instance = self.Instance(track, profile)
         with self.__lock:
             index = self.__instances.index(instance)
+            logging.info("found: %d", index)
             instance = self.__instances[index]
+            instance.new = False
             instance.progress = progress
             instance.eta = eta
 
     def instance_abort(self, track, profile):
+        logging.info("instance_abort: %s, %s", track, profile)
         instance = self.Instance(track, profile)
         with self.__lock:
             index = self.__instances.index(instance)
+            logging.info("found: %d", index)
             instance = self.__instances[index]
+            instance.new = False
             instance.aborted = True
 
     def instance_complete(self, track, profile, mime, output):
+        logging.info("instance_complete: %s, %s, %s, %s", track, profile, mime, output)
         instance = self.Instance(track, profile)
         with self.__lock:
             index = self.__instances.index(instance)
+            logging.info("found: %d", index)
             instance = self.__instances[index]
+            instance.new = False
             instance.complete = True
             instance.progress = 100
             instance.eta = 0

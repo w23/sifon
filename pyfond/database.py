@@ -27,3 +27,9 @@ class DummyDatabase:
                             break
         return AnyTagIterator(self._tracks, tags[''])
 
+    def get(self, track_id):
+        for track in self._tracks:
+            if track.id == track_id:
+                return track
+        raise Exception("Not found")
+
